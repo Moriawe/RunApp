@@ -1,14 +1,8 @@
 import com.android.build.api.dsl.LibraryExtension
-import com.moriawe.convention.ExtensionType
 import com.moriawe.convention.configureAndroidCompose
-import com.moriawe.convention.configureBuildTypes
-import com.moriawe.convention.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.kotlin
 
 class AndroidLibraryComposeConventionPlugin: Plugin<Project> {
 

@@ -1,14 +1,7 @@
-import com.android.build.api.dsl.LibraryExtension
-import com.moriawe.convention.ExtensionType
-import com.moriawe.convention.configureBuildTypes
-import com.moriawe.convention.configureKotlinAndroid
-import com.moriawe.convention.configureKotlinJvm
 import com.moriawe.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.kotlin
 
 class JvmKtorConventionPlugin: Plugin<Project> {
 
