@@ -44,7 +44,8 @@ internal fun Project.configureBuildTypes(
                     }
                 }
             }
-            ExtensionType.DYNAMIC_FEATURE -> {
+            else -> {}
+            /*ExtensionType.DYNAMIC_FEATURE -> {
                 extensions.configure<DynamicFeatureExtension> {
                     buildTypes {
                         debug {
@@ -56,7 +57,7 @@ internal fun Project.configureBuildTypes(
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 }
