@@ -12,8 +12,8 @@ inline fun  <T, E: Error, R> Result<T, E>.map(map: (T) -> R): Result<R, E> {
     }
 }
 
-typealias EmptyDataResult<E> = Result<Unit, E>
-fun <T, E: Error> Result<T, E>.asEmptyDataResult(): EmptyDataResult<E> {
+typealias EmptyResult<E> = Result<Unit, E>
+fun <T, E: Error> Result<T, E>.asEmptyDataResult(): EmptyResult<E> {
     return when (this) {
         is Result.Success -> Result.Success(Unit)
         is Result.Error -> Result.Error(error)

@@ -1,10 +1,12 @@
 plugins {
     alias(libs.plugins.runique.android.application.compose)
     alias(libs.plugins.runique.jvm.ktor)
+    alias(libs.plugins.mapsplatform.secrets.plugin)
 }
 
 android {
     namespace = "com.moriawe.myrunique"
+
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -18,7 +20,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-//    dynamicFeatures += setOf(":analytics:analytics_feature")
 }
 
 dependencies {
@@ -68,7 +69,6 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.data)
     implementation(projects.core.database)
-//    implementation(projects.core.notification)
 
     implementation(projects.auth.presentation)
     implementation(projects.auth.domain)
@@ -79,7 +79,4 @@ dependencies {
     implementation(projects.run.data)
     implementation(projects.run.location)
     implementation(projects.run.network)
-
-//    implementation(projects.core.connectivity.domain)
-//    implementation(projects.core.connectivity.data)
 }
