@@ -26,7 +26,7 @@ sealed interface DataError: Error {
 }
 
 
-// TODO: Just Examples
+// Just Examples below
 fun validatePassword(password: String): Result<Unit, DataError.PasswordValidationError> {
     if (password.length < 8) {
         return Result.Error(DataError.PasswordValidationError.TOO_SHORT)

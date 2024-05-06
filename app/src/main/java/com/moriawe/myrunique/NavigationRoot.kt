@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.moriawe.auth.presentation.intro.IntroScreenRoot
+import com.moriawe.auth.presentation.login.LoginScreenRoot
 import com.moriawe.auth.presentation.register.RegisterScreenRoot
 
 @Composable
@@ -18,6 +19,7 @@ fun NavigationRoot(
         startDestination = "auth"
     ) {
         authGraph(navController)
+        runGraph(navController)
     }
 }
 
@@ -53,7 +55,35 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
             )
         }
         composable(route = "login") {
-            // LoginScreenRoot()
+            LoginScreenRoot(
+                onLoginSuccess = {
+                    navController.navigate("run") {
+                        popUpTo("auth") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onSignUpClick = {
+                    navController.navigate("register") {
+                        popUpTo("login") {
+                            inclusive = true
+                            saveState = true
+                        }
+                        restoreState = true
+                    }
+                },
+            )
+        }
+    }
+}
+
+private fun NavGraphBuilder.runGraph(navController: NavHostController) {
+    navigation(
+        startDestination = "run_overview",
+        route = "run"
+    ) {
+        composable(route = "run_overview") {
+            //RunScreenRoot()
         }
     }
 }
