@@ -5,6 +5,7 @@ import com.moriawe.auth.data.di.authDataModule
 import com.moriawe.auth.presentation.di.authViewModelModule
 import com.moriawe.core.data.di.coreDataModule
 import com.moriawe.myrunique.di.appModule
+import com.moriawe.run.presentation.di.runViewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -25,7 +26,8 @@ class MyRuniqueApp: Application() {
                 authDataModule,
                 authViewModelModule,
                 appModule,
-                coreDataModule
+                coreDataModule,
+                runViewModelModule
             )
         }
     }
