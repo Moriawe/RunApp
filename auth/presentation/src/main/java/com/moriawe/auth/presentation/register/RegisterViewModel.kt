@@ -11,6 +11,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moriawe.auth.domain.AuthRepository
 import com.moriawe.auth.domain.UserDataValidator
+import com.moriawe.auth.presentation.R
+import com.moriawe.core.domain.util.DataError
+import com.moriawe.core.domain.util.Result
+import com.moriawe.core.presentation.ui.UiText
+import com.moriawe.core.presentation.ui.asUiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,10 +58,18 @@ class RegisterViewModel(
     }
 
     fun onAction(action: RegisterAction) {
-
+        when (action) {
+            RegisterAction.OnRegisterClick -> register()
+            RegisterAction.OnTogglePasswordVisibility -> {
+                state = state.copy(
+                    isPasswordVisible = !state.isPasswordVisible
+                )
+            }
+            else -> Unit
+        }
     }
 
-    private fun toRegister() {
+    private fun register() {
         state = state.copy(isRegistering = true)
         viewModelScope.launch {
             state = state.copy(isRegistering = true)
@@ -66,11 +79,17 @@ class RegisterViewModel(
             state = state.copy(isRegistering = false)
 
             when(result) {
+                is Result.Error -> {
+                    if (result.error == DataError.Network.CONFLICT) {
+                        eventChannel.send(RegisterEvent.Error(
+                            UiText.StringResource(R.string.register_error_email_exists)
+                        ))
+                    } else {
+                        eventChannel.send(RegisterEvent.Error(result.error.asUiText()))
+                    }
+                }
                 is Result.Success -> {
                     eventChannel.send(RegisterEvent.RegistrationSuccess)
-                }
-                is Result.Error -> {
-                    eventChannel.send(RegisterEvent.Error(result.error.asUiText())
                 }
             }
         }
