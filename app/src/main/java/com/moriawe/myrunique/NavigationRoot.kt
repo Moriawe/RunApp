@@ -9,6 +9,7 @@ import androidx.navigation.compose.navigation
 import com.moriawe.auth.presentation.intro.IntroScreenRoot
 import com.moriawe.auth.presentation.login.LoginScreenRoot
 import com.moriawe.auth.presentation.register.RegisterScreenRoot
+import com.moriawe.run.presentation.active_run.ActiveRunScreenRoot
 import com.moriawe.run.presentation.run_overview.RunOverviewScreenRoot
 
 @Composable
@@ -85,7 +86,14 @@ private fun NavGraphBuilder.runGraph(navController: NavHostController) {
         route = "run"
     ) {
         composable(route = "run_overview") {
-            RunOverviewScreenRoot()
+            RunOverviewScreenRoot(
+                onStartRunClick = {
+                    navController.navigate("active_run")
+                }
+            )
+        }
+        composable(route = "active_run") {
+            ActiveRunScreenRoot()
         }
     }
 }
