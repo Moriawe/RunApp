@@ -3,19 +3,22 @@ package com.moriawe.run.presentation.active_run
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moriawe.run.domain.RunningTracker
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import timber.log.Timber
+import kotlinx.coroutines.flow.stateIn
 
 class ActiveRunViewModel(
     private val runningTracker: RunningTracker
-): ViewModel() {
+) : ViewModel() {
 
     var state by mutableStateOf(ActiveRunState())
         private set
@@ -23,10 +26,20 @@ class ActiveRunViewModel(
     private val eventChannel = Channel<ActiveRunEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val _hasLocationPermission = MutableStateFlow(false)
+    // Convert a flow state to a flow
+    private val shouldTrack = snapshotFlow { state.shouldTrack }
+        .stateIn(viewModelScope, SharingStarted.Lazily, state.shouldTrack)
+    private val hasLocationPermission = MutableStateFlow(false)
+
+    private val isTracking = combine(
+        shouldTrack,
+        hasLocationPermission
+    ) { shouldTrack, hasPermission ->
+        shouldTrack && hasPermission
+    }.stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     init {
-        _hasLocationPermission
+        hasLocationPermission
             .onEach { hasPermission ->
                 if (hasPermission) {
                     runningTracker.startObservingLocation()
@@ -36,22 +49,61 @@ class ActiveRunViewModel(
             }
             .launchIn(viewModelScope)
 
-        runningTracker
-            .currentLocation
-            .onEach { location ->
-                Timber.d("New location: $location")
+        isTracking
+            .onEach { isTracking ->
+                runningTracker.setIsTracking(isTracking)
             }
             .launchIn(viewModelScope)
+
+        runningTracker
+            .currentLocation
+            .onEach {
+                state = state.copy(currentLocation = it?.location)
+            }
+            .launchIn(viewModelScope)
+
+        runningTracker
+            .runData
+            .onEach {
+                state = state.copy(runData = it)
+            }
+            .launchIn(viewModelScope)
+
+        runningTracker
+            .elapsedTime
+            .onEach {
+                state = state.copy(elapsedTime = it)
+            }
+            .launchIn(viewModelScope)
+
+//        For testing
+//        runningTracker
+//            .currentLocation
+//            .onEach { location ->
+//                Timber.d("New location: $location")
+//            }
+//            .launchIn(viewModelScope)
     }
 
     fun onAction(action: ActiveRunAction) {
-        when (action) {
-            ActiveRunAction.OnBackClick -> {}
-            ActiveRunAction.OnFinishRunClick -> {}
-            ActiveRunAction.OnResumeRunClick -> {}
-            ActiveRunAction.OnToggleRunClick -> {}
+        when(action) {
+            ActiveRunAction.OnFinishRunClick -> {
+
+            }
+            ActiveRunAction.OnResumeRunClick -> {
+                state = state.copy(shouldTrack = true)
+            }
+            ActiveRunAction.OnBackClick -> {
+                state = state.copy(shouldTrack = false)
+            }
+            ActiveRunAction.OnToggleRunClick -> {
+                state = state.copy(
+                    hasStartedRunning = true,
+                    shouldTrack = !state.shouldTrack
+                )
+            }
             is ActiveRunAction.SubmitLocationPermissionInfo -> {
-                _hasLocationPermission.value = action.acceptedLocationPermission
+                hasLocationPermission.value = action.acceptedLocationPermission
                 state = state.copy(
                     showLocationRationale = action.showLocationRationale
                 )
@@ -63,11 +115,10 @@ class ActiveRunViewModel(
             }
             is ActiveRunAction.DismissRationaleDialog -> {
                 state = state.copy(
-                    showLocationRationale = false,
-                    showNotificationRationale = false
+                    showNotificationRationale = false,
+                    showLocationRationale = false
                 )
             }
-            else -> Unit
         }
     }
 
