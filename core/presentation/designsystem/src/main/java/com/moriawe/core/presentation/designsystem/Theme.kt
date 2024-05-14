@@ -24,7 +24,8 @@ val DarkColorScheme = darkColorScheme(
 
     error = RuniqueDarkRed,
     onSecondary = RuniqueBlack,
-    onError = RuniqueWhite
+    onError = RuniqueWhite,
+    errorContainer = RuniqueDarkRed5
 )
 
 @Composable
