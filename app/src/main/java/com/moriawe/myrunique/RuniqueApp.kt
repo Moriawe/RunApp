@@ -4,6 +4,7 @@ import android.app.Application
 import com.moriawe.auth.data.di.authDataModule
 import com.moriawe.auth.presentation.di.authViewModelModule
 import com.moriawe.core.data.di.coreDataModule
+import com.moriawe.core.database.di.databaseModule
 import com.moriawe.myrunique.di.appModule
 import com.moriawe.run.location.di.locationModule
 import com.moriawe.run.presentation.di.runPresentationModule
@@ -33,7 +34,8 @@ class MyRuniqueApp: Application() {
                 appModule,
                 coreDataModule,
                 runPresentationModule,
-                locationModule
+                locationModule,
+                databaseModule
             )
         }
     }
