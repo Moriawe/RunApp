@@ -34,6 +34,7 @@ class ActiveRunService: Service() {
         NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(com.moriawe.core.presentation.designsystem.R.drawable.logo)
             .setContentTitle(getString(R.string.active_run))
+            .setOnlyAlertOnce(true) // Only alert once when the notification is created
     }
 
     private val runningTracker by inject<RunningTracker>()
@@ -89,6 +90,23 @@ class ActiveRunService: Service() {
         }.launchIn(serviceScope)
     }
 
+    // If Notification stops updating after a few seconds, apply this fix
+    /*
+    private fun updateNotification() {
+    var previousElapsedTime = Duration.ZERO
+    runningTracker.elapsedTime.onEach { elapsedTime ->
+        if (elapsedTime.inWholeSeconds > previousElapsedTime.inWholeSeconds) {
+            val notification = baseNotification
+                .setContentText(elapsedTime.formatted())
+                .build()
+            Timber.d("Updating notification")
+            notificationManager.notify(1, notification)
+            previousElapsedTime = elapsedTime
+        }
+    }.launchIn(serviceScope)
+}
+     */
+
     fun stop() {
         stopSelf()
         isServiceActive = false
@@ -102,7 +120,7 @@ class ActiveRunService: Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.active_run),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channel)
         }

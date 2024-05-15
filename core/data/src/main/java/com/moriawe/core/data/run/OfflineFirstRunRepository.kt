@@ -8,10 +8,16 @@ import com.moriawe.core.domain.run.RemoteRunDataSource
 import com.moriawe.core.domain.run.Run
 import com.moriawe.core.domain.run.RunId
 import com.moriawe.core.domain.run.RunRepository
+import com.moriawe.core.domain.run.SyncRunScheduler
 import com.moriawe.core.domain.util.DataError
 import com.moriawe.core.domain.util.EmptyResult
 import com.moriawe.core.domain.util.Result
 import com.moriawe.core.domain.util.asEmptyDataResult
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
+import io.ktor.client.plugins.plugin
+import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -24,7 +30,9 @@ class OfflineFirstRunRepository(
     private val remoteRunDataSource: RemoteRunDataSource,
     private val applicationScope: CoroutineScope,
     private val runPendingSyncDao: RunPendingSyncDao,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val syncRunScheduler: SyncRunScheduler,
+    private val client: HttpClient
 ): RunRepository {
 
     override fun getRuns(): Flow<List<Run>> {
@@ -59,6 +67,14 @@ class OfflineFirstRunRepository(
 
         return when(remoteResult) {
             is Result.Error -> {
+                applicationScope.launch {
+                    syncRunScheduler.scheduleSync(
+                        type = SyncRunScheduler.SyncType.CreateRun(
+                            run = runWithId,
+                            mapPictureBytes = mapPicture
+                        )
+                    )
+                }.join()
                 Result.Success(Unit)
             }
             is Result.Success -> {
@@ -76,7 +92,8 @@ class OfflineFirstRunRepository(
         // and then deleted in offline-mode as well. In that case,
         // we don't need to sync anything.
         val isPendingSync = runPendingSyncDao.getRunPendingSyncEntity(id) != null
-        if(isPendingSync) {
+
+        if (isPendingSync) {
             runPendingSyncDao.deleteRunPendingSyncEntity(id)
             return
         }
@@ -84,6 +101,14 @@ class OfflineFirstRunRepository(
         val remoteResult = applicationScope.async {
             remoteRunDataSource.deleteRun(id)
         }.await()
+
+        if(remoteResult is Result.Error) {
+            applicationScope.launch {
+                syncRunScheduler.scheduleSync(
+                    type = SyncRunScheduler.SyncType.DeleteRun(id)
+                )
+            }.join()
+        }
     }
 
 
@@ -131,5 +156,21 @@ class OfflineFirstRunRepository(
             createJobs.forEach { it.join() }
             deleteJobs.forEach { it.join() }
         }
+    }
+
+    override suspend fun deleteAllRuns() {
+        localRunDataSource.deleteAllRuns()
+    }
+
+    override suspend fun logout(): EmptyResult<DataError.Network> {
+        val result = client.get<Unit>(
+            route = "/logout"
+        ).asEmptyDataResult()
+
+        client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>()
+            .firstOrNull()
+            ?.clearToken()
+
+        return result
     }
 }
