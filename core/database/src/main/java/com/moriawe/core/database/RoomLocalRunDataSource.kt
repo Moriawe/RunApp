@@ -32,7 +32,7 @@ class RoomLocalRunDataSource(
         }
     }
 
-    override suspend fun uspertRuns(runs: List<Run>): Result<List<RunId>, DataError.Local> {
+    override suspend fun upsertRuns(runs: List<Run>): Result<List<RunId>, DataError.Local> {
         return try {
             val entities = runs.map { it.toRunEntity() }
             runDao.upsertRuns(entities)

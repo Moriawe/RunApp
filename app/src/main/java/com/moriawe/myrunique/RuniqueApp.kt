@@ -7,6 +7,7 @@ import com.moriawe.core.data.di.coreDataModule
 import com.moriawe.core.database.di.databaseModule
 import com.moriawe.myrunique.di.appModule
 import com.moriawe.run.location.di.locationModule
+import com.moriawe.run.network.di.networkModule
 import com.moriawe.run.presentation.di.runPresentationModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -35,7 +36,8 @@ class MyRuniqueApp: Application() {
                 coreDataModule,
                 runPresentationModule,
                 locationModule,
-                databaseModule
+                databaseModule,
+                networkModule
             )
         }
     }

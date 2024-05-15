@@ -12,7 +12,7 @@ interface LocalRunDataSource {
 
     suspend fun upsertRun(run: Run): Result<RunId, DataError.Local>
 
-    suspend fun uspertRuns(runs: List<Run>): Result<List<RunId>, DataError.Local>
+    suspend fun upsertRuns(runs: List<Run>): Result<List<RunId>, DataError.Local>
 
     suspend fun deleteRun(id: String)
 
