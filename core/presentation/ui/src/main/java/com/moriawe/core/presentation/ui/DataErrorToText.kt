@@ -5,7 +5,7 @@ import com.moriawe.core.domain.util.DataError
 fun DataError.asUiText(): UiText {
     return when(this) {
         DataError.Local.DISK_FULL -> UiText.StringResource(id = R.string.error_disk_full)
-        DataError.Local.FILE_NOT_FOUND -> UiText.StringResource(id = R.string.error_file_not_found)
+        //DataError.Local.FILE_NOT_FOUND -> UiText.StringResource(id = R.string.error_file_not_found)
         DataError.Network.REQUEST_TIMEOUT -> UiText.StringResource(id = R.string.error_request_timeout)
 //        DataError.Network.UNAUTHORIZED -> TODO()
 //        DataError.Network.CONFLICT -> TODO()
