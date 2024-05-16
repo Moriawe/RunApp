@@ -1,11 +1,16 @@
 package com.moriawe.myrunique
 
 import android.app.Application
+import android.content.Context
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.moriawe.auth.data.di.authDataModule
 import com.moriawe.auth.presentation.di.authViewModelModule
 import com.moriawe.core.data.di.coreDataModule
 import com.moriawe.core.database.di.databaseModule
 import com.moriawe.myrunique.di.appModule
+import com.moriawe.run.data.di.runDataModule
 import com.moriawe.run.location.di.locationModule
 import com.moriawe.run.network.di.networkModule
 import com.moriawe.run.presentation.di.runPresentationModule
@@ -22,9 +27,11 @@ class MyRuniqueApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        //if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        //}
+//        if (BuildConfig.DEBUG) {
+//            Timber.plant(Timber.DebugTree())
+//        }
+
+        Timber.plant(Timber.DebugTree())
 
         startKoin {
             androidLogger()
@@ -37,8 +44,15 @@ class MyRuniqueApp: Application() {
                 runPresentationModule,
                 locationModule,
                 databaseModule,
-                networkModule
+                networkModule,
+                runDataModule
             )
         }
+
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        SplitCompat.install(this)
     }
 }

@@ -1,5 +1,6 @@
 package com.moriawe.core.data.run
 
+import com.moriawe.core.data.network.get
 import com.moriawe.core.database.dao.RunPendingSyncDao
 import com.moriawe.core.database.mapper.toRun
 import com.moriawe.core.domain.SessionStorage
@@ -17,7 +18,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.plugin
-import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -51,7 +51,6 @@ class OfflineFirstRunRepository(
             }
         }
     }
-
 
     override suspend fun upsertRun(run: Run, mapPicture: ByteArray): EmptyResult<DataError> {
         val localResult = localRunDataSource.upsertRun(run)
@@ -92,8 +91,7 @@ class OfflineFirstRunRepository(
         // and then deleted in offline-mode as well. In that case,
         // we don't need to sync anything.
         val isPendingSync = runPendingSyncDao.getRunPendingSyncEntity(id) != null
-
-        if (isPendingSync) {
+        if(isPendingSync) {
             runPendingSyncDao.deleteRunPendingSyncEntity(id)
             return
         }
@@ -110,7 +108,6 @@ class OfflineFirstRunRepository(
             }.join()
         }
     }
-
 
     override suspend fun syncPendingRuns() {
         withContext(Dispatchers.IO) {
